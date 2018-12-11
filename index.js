@@ -1,6 +1,11 @@
 const express = require('express')
-const app = express()
+const keys = require('./config/keys')
+const mongoose = require('mongoose')
 
+mongoose.connect(keys.mLabURI, { useNewUrlParser: true })
+require('./models/User') // must be called before passport require (to load schema)
+
+const app = express()
 require('./services/passport')
 require('./routes/authRoutes')(app)
 
