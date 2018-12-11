@@ -5,7 +5,7 @@ const passport = require('passport')
 
 // initialize database and authentication
 const keys = require('./config/keys')
-mongoose.connect(keys.mLabURI, { useNewUrlParser: true })
+mongoose.connect(encodeURI(keys.mLabURI), { useNewUrlParser: true })
 require('./models/User')
 require('./services/passport')
 
