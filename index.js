@@ -28,7 +28,7 @@ require('./routes/authRoutes')(app)
 require('./routes/billingRoutes')(app)
 
 if (process.env.NODE_ENV === 'production') {
-	app.use(express.static('cliend/build'))
+	app.use(express.static('client/build'))
 
 	// we are using react-router. Direct all unknown urls to index.html
 	const path = require('path')
