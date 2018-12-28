@@ -7,6 +7,7 @@ const passport = require('passport')
 const keys = require('./config/keys')
 mongoose.connect(keys.mLabURI, { useNewUrlParser: true })
 require('./models/User')
+require('./models/Survey')
 require('./services/passport')
 
 // initialize express with sessions
