@@ -27,6 +27,7 @@ app.use(passport.session())
 // initialize routes and configure server
 require('./routes/authRoutes')(app)
 require('./routes/billingRoutes')(app)
+require('./routes/surveyRoutes')(app)
 
 if (process.env.NODE_ENV === 'production') {
 	app.use(express.static('client/build'))
