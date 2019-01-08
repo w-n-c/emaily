@@ -14,7 +14,7 @@ module.exports = app => {
 
 			req.user.credits += 5
 			const user = await req.user.save()
-			res.send(user)
+			res.json(user)
 		} catch (err) {
 			console.log(Promise.reject(err))
 			return res.status(500).send({ error: err })
