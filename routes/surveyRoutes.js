@@ -1,3 +1,6 @@
+const _ = require('lodash')
+const { Path } = require('path-parser')
+const { URL } = require('url')
 const mongoose = require('mongoose')
 const requireLogin = require('../middlewares/requireLogin')
 const requireCredits = require('../middlewares/requireCredits')
@@ -10,6 +13,24 @@ module.exports = app => {
 	app.get('/api/surveys/thanks', (req, res) => {
 		res.send('Thanks for your submission!')
 	})
+
+	app.post('/api/surveys/webhooks', (req, res) => {
+		const p = new Path('/api/surveys/:surveyId/:choice')
+
+		const events = _.chain(req.body)
+			.map(({email, url}) => {
+				const match = p.test(new URL(url).pathname)
+				if (match) {
+					return { email, ...match }
+				}
+			})
+			.compact()
+			.uniqBy('email', 'surveyId')
+			.value()
+
+		res.json({})
+	})
+
 	app.post('/api/surveys', requireLogin, requireCredits, async (req, res) => {
 		const { title, subject, body, recipients } = req.body
 
@@ -26,7 +47,7 @@ module.exports = app => {
 		try {
 			await mailer.send()
 			await survey.save()
-			req.user.credits -= 1;
+			req.user.credits -= 1
 			const user = await req.user.save()
 			res.json(user)
 		} catch (e) {

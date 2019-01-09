@@ -11,15 +11,20 @@
   "start": "node index.js",
   "server": "nodemon index.js",
   "client": "cd client && yarn run start",
-  "dev": "concurrently \"npm run server\" \"npm run client\"",
-  "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false cd client && yarn install && yarn run build"
+  "dev": "concurrently \"npm run server\" \"npm run client\" \"npm run webhook\"",
+  "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false cd client && yarn install && yarn run build",
+  "webhook": "ngrok http 5000"
  },
  "dependencies": {
   "express": "^4.16.4",
   "express-session": "^1.15.6",
+  "localtunnel": "^1.9.1",
+  "lodash": "^4.17.11",
   "mongoose": "^5.3.15",
+  "ngrok": "^3.1.0",
   "passport": "^0.4.0",
   "passport-google-oauth20": "^1.0.0",
+  "path-parser": "^4.2.0",
   "sendgrid": "^5.2.3",
   "stripe": "^6.19.0"
  },
