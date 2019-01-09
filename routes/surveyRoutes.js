@@ -10,14 +10,14 @@ const surveyTemplate = require ('../services/emailTemplates/surveyTemplate')
 const Survey = mongoose.model('surveys')
 
 module.exports = app => {
-	app.get('/api/surveys/thanks', (req, res) => {
+	app.get('/api/surveys/:surveyId/:choice', (req, res) => {
 		res.send('Thanks for your submission!')
 	})
 
 	app.post('/api/surveys/webhooks', (req, res) => {
 		const p = new Path('/api/surveys/:surveyId/:choice')
 
-		const events = _.chain(req.body)
+		_.chain(req.body)
 			.map(({email, url}) => {
 				const match = p.test(new URL(url).pathname)
 				if (match) {
@@ -26,19 +26,42 @@ module.exports = app => {
 			})
 			.compact()
 			.uniqBy('email', 'surveyId')
+			.each(({surveyId, email, choice}) => {
+				Survey.updateOne({
+					_id: surveyId,
+					recipients: {
+						$elemMatch: { email, responded: false }
+					}
+				}, {
+					$inc: { [choice]: 1},
+					$set: { 'recipients.$.responded': true },
+					lastResponded: newDate()
+				}).exec()
+			})
 			.value()
 
 		res.json({})
 	})
 
 	app.post('/api/surveys', requireLogin, requireCredits, async (req, res) => {
-		const { title, subject, body, recipients } = req.body
+		let { title, subject, body, recipients } = req.body
+		if (recipients.indexOf(',') === -1) {
+			recipients = recipients.split(" ").filter(email => {
+				if (email === "") {
+					return false;
+				}
+				return true;
+			});
+		} else {
+			recipients = recipients.split(",")
+		}
+		recipients = recipients.map(email => ({ email: email.trim() }));
 
 		const survey = new Survey ({
 			title,
 			subject,
 			body,
-			recipients: recipients.split(',').map(email => ({ email: email.trim() })),
+			recipients,
 			_user: req.user.id,
 			dateSent: Date.now()
 		})
@@ -50,7 +73,7 @@ module.exports = app => {
 			req.user.credits -= 1
 			const user = await req.user.save()
 			res.json(user)
-		} catch (e) {
+		} catch (err) {
 			res.status(422).send(err)
 		}
 	})
